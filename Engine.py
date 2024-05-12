@@ -5,15 +5,19 @@ import random
 import Internal
 import Internal.Player
 from Language import Languages
+from Register import Register
 from Time import Tick
 
+global REGISTER
 global TICKER
 global LANG
 TICKER = Tick()
 LANG = Languages()
+REGISTER = Register()
 
-class Loop:
+class Engine:
     def __init__(self, **kwargs):
+        self.REGISTER = REGISTER
         self.TICKER = TICKER
         self.LANG = LANG
 
@@ -29,10 +33,13 @@ class Loop:
     def _getTargetFps(self) -> int:
         return self.target_fps
     
+    def _register(self, name, item):
+        setattr(self, name, item)
+    
     def start(self) -> None:
         self.current_fps = 0
 
-        Player1 = Internal.Player.Player("Albert")
+        self._register("items", )
 
         try:
             while True:

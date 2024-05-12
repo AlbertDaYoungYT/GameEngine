@@ -1,6 +1,8 @@
-from Engine import Loop
+from Engine import Engine
 
-game = Loop()
+game = Engine()
 game.start()
+
+
 
 exit()
