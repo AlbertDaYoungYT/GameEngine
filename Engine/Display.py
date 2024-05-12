@@ -22,17 +22,20 @@ class Display:
     def __str__(self) -> str:
         return self.id
     
-    def _bufferLength(self) -> tuple:
-        return len(self.buffer_a), len(self.buffer_a[0])
-    
     def _refresh(self):
         self.term_size = [os.get_terminal_size().columns, os.get_terminal_size().lines]
     
-    def _newLine(self) -> None:
-        self.output("")
-    
     def _flush(self):
         os.system("cls")
+    
+    def _compareLines(self, a, b):
+        
+    
+    def _combineLayers(self):
+        for layer in self.buffer_a:
+            for line in layer:
+                if line
+        #return buffer
     
     def _switchBuffer(self) -> None:
         self.buffer_b[:] = []
@@ -53,9 +56,7 @@ class Display:
         self._flush()
         self._switchBuffer()
         for y in self.buffer_b:
-            for x in self.buffer_b[self.buffer_b.index(y)]:
-                self.output(x.decode(), end="")
-            self._newLine()
+            self.output(b''.join(y).decode())
 
         self.render_time = time.time() - start
 
