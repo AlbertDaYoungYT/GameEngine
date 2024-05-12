@@ -32,16 +32,17 @@ class Engine:
     def start(self) -> None:
         self.current_fps = 0
         D = self.DISPLAY
+        
 
-        try:
-            while True:
-                #print("Tick", self.current_fps)
-                D._writeToBuffer(random.randrange(1, 5), random.randrange(1, 5), b'A')
-                D.render()
-
-                self.current_fps = round(1/self.TICKER.tick(1/self.target_fps), 4)
-        except KeyboardInterrupt:
-            self.stop()
+#        try:
+#            while True:
+#                #print("Tick", self.current_fps)
+#                D._writeToBuffer(random.randrange(1, 5), random.randrange(1, 5), b'A')
+#                D.render()
+#
+#                self.current_fps = round(1/self.TICKER.tick(1/self.target_fps), 4)
+#        except KeyboardInterrupt:
+#            self.stop()
     
     def stop(self) -> None:
         print("Total Ticks:", self.TICKER.ticks)
