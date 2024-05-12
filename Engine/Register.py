@@ -4,6 +4,7 @@
 class Register:
 
     def __init__(self):
+        self.id = "Register"
         self.register = {}
     
     def register(self, name, value):

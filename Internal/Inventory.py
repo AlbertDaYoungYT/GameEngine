@@ -1,11 +1,13 @@
 
 from Internal.Item import ItemStack
+from Internal.Item import Item
 
 class Inventory(object):
     def __init__(self, inventory_id) -> None:
         self.inventory_id = inventory_id
+        self.hand = None
 
-        self.size = [8, 2]
+        self.size = [4, 2]
         self.inventory = [None*self.size[0]]*self.size[1]
     
     def __str__(self) -> str:
@@ -26,3 +28,9 @@ class Inventory(object):
     
     def _getInventory(self):
         return self.inventory
+    
+    def _addToHand(self, itemStack: ItemStack) -> None:
+        self.hand = itemStack
+        
+    def _removeFromHand(self, itemStack: ItemStack) -> None:
+        self.hand = self.hand.remove()

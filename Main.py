@@ -1,6 +1,6 @@
 from Engine import Engine
 
-game = Engine()
+game = Engine(target_fps=2)
 game.start()
 
 

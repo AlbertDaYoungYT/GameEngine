@@ -1,7 +1,7 @@
 
 from typing import Any
-from Language import Languages
-from Time import Tick
+from Engine.Language import Language
+from Engine.Time import Tick
 
 
 class ResistanceTypes(object):
@@ -14,7 +14,7 @@ class ResistanceTypes(object):
 
 class DamageTypes(object):
     class __Fire:
-        def __init__(self, TICKER: Tick, LANG: Languages) -> None:
+        def __init__(self, TICKER: Tick, LANG: Language) -> None:
             self.TICKER = TICKER
             self.LANGUAGE = LANG
 
@@ -57,7 +57,7 @@ class DamageTypes(object):
             target.damageEntity(do_damage_amount_after_resistance, tick_callback=self.doDamageTick, tick_callback_data=[entity, target, self.TICKER._register(self.__class__)], set_damage_effect=self.LANGUAGE.translate("TYPES_FIRE_EFFECT"))
 
     class __Normal:
-        def __init__(self, TICKER: Tick, LANG: Languages) -> None:
+        def __init__(self, TICKER: Tick, LANG: Language) -> None:
             self.TICKER = TICKER
             self.LANGUAGE = LANG
 
@@ -75,7 +75,7 @@ class DamageTypes(object):
             target.damageEntity(do_damage_amount_after_resistance)
 
     class __Heavy:
-        def __init__(self, TICKER: Tick, LANG: Languages) -> None:
+        def __init__(self, TICKER: Tick, LANG: Language) -> None:
             self.TICKER = TICKER
             self.LANGUAGE = LANG
 
@@ -96,7 +96,7 @@ class DamageTypes(object):
 
 class HealthTypes(object):
     class IMMUNE:
-        def __init__(self, TICKER: Tick, LANG: Languages) -> None:
+        def __init__(self, TICKER: Tick, LANG: Language) -> None:
             self.TICKER = TICKER
             self.LANGUAGE = LANG
 
@@ -106,7 +106,7 @@ class HealthTypes(object):
             self.resistance = [1.0]*ResistanceTypes.__dict__.__len__()
         
     class NORMAL:
-        def __init__(self, TICKER: Tick, LANG: Languages) -> None:
+        def __init__(self, TICKER: Tick, LANG: Language) -> None:
             self.TICKER = TICKER
             self.LANGUAGE = LANG
 

@@ -3,6 +3,7 @@ import time
 class Tick:
 
     def __init__(self):
+        self.id = "Tick"
         self.ticks = 0
         self.tick_timers = {}
 
@@ -33,7 +34,7 @@ class Tick:
     
     def tick(self, target_tick_time) -> None:
         start = time.time()
-        for ticker, v in self.tick_timers.values():
+        for ticker, v in self.tick_timers.items():
             self._inc(ticker)
         self.ticks += 1
         time.sleep(target_tick_time)

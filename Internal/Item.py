@@ -1,6 +1,4 @@
-from Engine import TICKER
-from Engine import LANG
-from Language import Languages
+from Engine.Language import Language
 
 class Item:
     def __init__(self, id: str, attr=None):
@@ -11,9 +9,11 @@ class Item:
             for k, v in attr.__dict__.items():
                 setattr(self, k, v)
 
+        self.LANG = Language()
+
         self.id = id
-        self.name = LANG.translate(f"ITEM_NAME_{id.upper()}")
-        self.description = LANG.translate(f"ITEM__DESCRIPTION_{id.upper()}")
+        self.name = self.LANG.translate(f"ITEM_NAME_{id.upper()}")
+        self.description = self.LANG.translate(f"ITEM_DESCRIPTION_{id.upper()}")
     
     def __str__(self):
         return self.name
@@ -61,7 +61,7 @@ class ItemStack(Item):
 
 class Items(object):
     IRON_NUGGET: Item = Item("iron_nugget")._setMaxStack(100)._setRarity(1)
-    GOLD_NUGGET: Item = Item("gold_nugget").copyOf(IRON_NUGGET)._setRarity(2)
-    DIAMOND: Item = Item("diamond").copyOf(IRON_NUGGET)._setRarity(5)
+#    GOLD_NUGGET: Item = Item("gold_nugget").copyOf(IRON_NUGGET)._setRarity(2)
+#    DIAMOND: Item = Item("diamond").copyOf(IRON_NUGGET)._setRarity(5)
 
 
