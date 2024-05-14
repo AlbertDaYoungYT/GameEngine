@@ -1,7 +1,7 @@
 
 from typing import Any
 from Engine.Language import Language
-from Engine.Time import Tick
+from LEGACY.Engine.Time import Tick
 
 
 class ResistanceTypes(object):

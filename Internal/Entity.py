@@ -7,7 +7,7 @@ from Internal.Item import ItemStack
 import Internal.Types
 from Engine.Language import Language
 from Internal.Inventory import Inventory
-from Engine.Time import Tick
+from LEGACY.Engine.Time import Tick
 
 
 class Entity:
