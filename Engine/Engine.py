@@ -1,4 +1,5 @@
 import math
+import queue
 import time
 import random
 
@@ -12,7 +13,6 @@ class Engine:
         self.REGISTER = REGISTER
         self.TICKER = TICKER
         self.LANG = LANG
-        self.DISPLAY = Display(self.TICKER)
 
         self.start_time = time.time()
         self.target_fps = 30
@@ -31,21 +31,22 @@ class Engine:
     
     def start(self) -> None:
         self.current_fps = 0
-        D = self.DISPLAY
+        RenderQueue = queue.Queue()
+        
+        self.RThread = RenderThread(RenderQueue)
+        self.RThread.start()
+        RenderQueue.put([Render.Line, [1, 5, 7, 3], 0])
         
 
         try:
             while True:
-                #print("Tick", self.current_fps)
-                D._writeToBuffer(random.randrange(1, 5), random.randrange(1, 5), b'A')
-                D.render()
-
                 self.current_fps = round(1/self.TICKER.tick(1/self.target_fps), 4)
         except KeyboardInterrupt:
             self.stop()
     
     def stop(self) -> None:
-        print("Total Ticks:", self.TICKER.ticks)
+        print("Total Ticks:", self.TICKER.proc_tick)
         print("Tick Time:", self.current_fps, "ms")
-        print("Render Time:", self.DISPLAY.render_time, "ms")
+        print("Render Time:", self.RThread.render_time, "ms")
         print("Stopping...")
+        self.RThread.terminate()

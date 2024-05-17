@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import queue
 import platform
 import threading
 
@@ -29,130 +30,84 @@ class Alpha(object):
         return self.alpha == 0
 
 
-class Buffer(object):
-    class Layer(object):
-        class Line(object):
-            def __init__(self, l) -> None:
-                self.LINE = [Alpha(None, a=0)]*l
-                self.length = l
-            
-            def __str__(self):
-                return self.LINE
-            
-            def __eq__(self, other):
-                if len(self.LINE) != len(other.LINE): return False
-                return [ item==other.LINE[self.LINE.index(item)] for item in self.LINE ] == [True]*len(self.LINE)
-
-            def __ne__(self, other):
-                return not self.__eq__(other)
-            
-            def diff(self, other):
-                res = []
-                for i in self.LINE:
-                    if i != other.LINE[self.LINE.index(i)]: res.append(self.LINE.index(i))
-                return res
-            
-
-        def __init__(self, x, y) -> None:
-            self.LAYER = [self.Line(x)]*y
-            self.x = x
-            self.y = y
-        
-        def set(self, x, y, value):
-            self.LAYER[y].LINE[x] = value
-        
-        def merge(self, other):
-            base_layer = self.LAYER
-            layer2     = other.LAYER
-
-            base_layer_diff = [ x.diff(layer2[base_layer.index(x)]) for x in base_layer]
-            for line in base_layer_diff:
-                pos_y = base_layer_diff.index(line)
-                for diff in line:
-                    diff1 = base_layer[pos_y].LINE[diff]
-                    diff2 = layer2[pos_y].LINE[diff]
-                    if diff1.isTransparent():
-                        self.set(diff, pos_y, diff2)
-                    if diff2.isTransparent():
-                        self.set(diff, pos_y, diff1)
-            
-            return self.LAYER
-        
-        def __str__(self):
-            return self.LAYER
-        
-        def __eq__(self, other):
-            if self.x != other.x and self.y != other.y: return False
-            return [ line==other.LAYER[self.LAYER.index(line)] for line in self.LAYER ] == [True]*self.y
-        
-        def __ne__(self, other):
-            return not self.__eq__(other)
-
-
-    def __init__(self, x: int, y: int, z: int = 1):
-        self.layer_count = z
-        self.BUFFER = [self.Layer(x, y)]*z
-        self.x = x
-        self.y = y
-    
-    def __str__(self):
-        return self.BUFFER
-    
-    def __eq__(self, other):
-        if self.x != other.x and self.y != other.y and self.layer_count != other.layer_count: return False
-        return [ layer==other.BUFFER[self.BUFFER.index(layer)] for layer in self.BUFFER] == [True]*self.layer_count
-    
-    def __ne__(self, other):
-        return not self.__eq__(other)
-    
-    def addLayer(self, layer: Layer):
-        self.BUFFER.append(layer)
-        self.layer_count += 1
-
-    def removeLayer(self, z: int):
-        self.BUFFER.pop(z)
-    
-    def removeLayer(self, layer: Layer):
-        self.BUFFER.remove(layer)
-    
-    def mergeLayer(self, z, layer: Layer):
-        self.BUFFER[z].merge(layer)
-        
-    def flatten(self):
-        buffer = self.BUFFER
-        for layer_index in range(len(buffer)):
-            self.mergeLayer(0, buffer[layer_index])
-        return self.BUFFER
-
 class RenderThread(threading.Thread):
-    def __init__(self, TICKER: Tick, *args):
+    def __init__(self, QUEUE):
         threading.Thread.__init__(self)
-        self.id = "RenderThread"
-        self.output = print
-        self.TICKER = TICKER
-        self.tick = self.TICKER._register(self.id, 2, callback=self._tick_callback)
-        self.term_size = [os.get_terminal_size().columns, os.get_terminal_size().lines]
+        self.id = "Display"
+        self.QUEUE = QUEUE
+        self.output = sys.stdout
 
-        self.layers = 4
+        self.buffer_a = {}
+        self.screen_buffer = {}
+        self.prev_screen_buffer = {}
 
-        # Buffers
-        self.buffer_a = Buffer(self.term_size[0], self.term_size[1], z=self.layers) # A Buffer
-        self.buffer_b = Buffer(self.term_size[0], self.term_size[1]) # Render Buffer
-        self.v_buffer = self.buffer_b[:]
+        self.render_time = 0
+
+        self.screen_size = [os.get_terminal_size()[0], os.get_terminal_size()[1]]
     
-    def _tick_callback(self, _self, t, v):
-        self._switchBuffer()
+    def _flush(self):
+        self.output.flush()
     
+    def _write(self, x, y, char):
+        self.output.write("\x1b7\x1b[%d;%df%s\x1b8" % (x, y, char))
+        self._flush()
     
-    def _compressBufferA(self):
-        for layer in range(self.layers):
-            self.buffer_v
-    
-    def _switchBuffer(self):
+    def _validate(self):
+        screen_buffer_copy = self.screen_buffer.copy()
+        for key, value in self.prev_screen_buffer.items():
+            current = screen_buffer_copy[key]
+            if current.isTransparent() and not value.isTransparent():
+                screen_buffer_copy[key] = value
         
+        if screen_buffer_copy == self.screen_buffer and self.buffer_a == {}: return True
+        return False
+    
+    def clear(self):
+        self.buffer_a = {}
+        self.screen_buffer = {}
 
+        for line in range(self.screen_size[1]):
+            for column in range(self.screen_size[0]):
+                self._write(line, column, " ")
     
-    def _refresh(self):
-        self.term_size = [os.get_terminal_size().columns, os.get_terminal_size().lines]
+    def addToBuffer(self, sequence):
+        for key, value in sequence.items():
+            self.buffer_a[key] = value
     
-    def flush(self):
+    def render(self, *args, **kwargs):
+        for key, value in self.buffer_a.items():
+            try:
+                current = self.screen_buffer[key]
+            except KeyError:
+                current = Alpha(" ", a=0)
+            if current.isTransparent() and not value.isTransparent():
+                self.screen_buffer[key] = value
+        
+        for key, value in self.screen_buffer.items():
+            x, y = key.split(":")
+            self._write(x, y, value.c)
+        
+        self.prev_screen_buffer = self.screen_buffer
+        
+        if kwargs.get("no_clear_buffer_a", False): return True
+        self.buffer_a = {}
+        return True
+    
+    def run(self):
+        self.clear()
+        while True:
+            try:
+                work = self.QUEUE.get()
+                if work[0] == "CLS":
+                    self.clear()
+            except queue.Empty:
+                continue
+
+            work[0](*work[1]).draw(self)
+        
+            if not self._validate():
+                start_time = time.time()
+                self.render()
+
+                self.QUEUE.task_done()
+                self.render_time = ms(time.time() - start_time)
