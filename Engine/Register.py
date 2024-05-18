@@ -17,3 +17,7 @@ class Register:
         return self.register.values()
     
     
+    def update(self):
+        for k, v in self.register.items():
+            v.update(k)
+    

@@ -4,6 +4,7 @@ from Engine.Display import *
 from Engine.Language import *
 from Engine.Register import *
 from Engine.Renderer import *
+from Engine.Input import *
 
 global REGISTER
 global TICKER
